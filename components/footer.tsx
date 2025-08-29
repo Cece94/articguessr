@@ -17,10 +17,17 @@ export function Footer() {
                                 </a>
                             </p>
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                             <p>
                                 Image credits and attributions displayed with individual artworks
                             </p>
+                            <span>•</span>
+                            <a
+                                href="/about"
+                                className="underline underline-offset-4 hover:text-foreground transition-colors"
+                            >
+                                About
+                            </a>
                         </div>
                     </div>
                 </div>
