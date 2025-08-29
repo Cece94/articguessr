@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from 'react';
 import { useArtworks } from '../hooks/use-artworks';
 import { useInfiniteScroll } from '../hooks/use-infinite-scroll';
 import { ArtworkGrid } from './artwork-grid';
 import { ErrorState } from './error-state';
 import { InfiniteScrollTrigger } from './infinite-scroll-trigger';
-import { Artwork } from '@/models';
+import { FiltersBar } from './filters-bar';
+import { Artwork, Filters } from '@/models';
 
 /**
  * Main content component for the Explore page
@@ -20,6 +22,11 @@ import { Artwork } from '@/models';
  * keeping the component itself focused on rendering the UI.
  */
 export function ExploreContent() {
+    const [currentFilters, setCurrentFilters] = useState<Filters>({
+        page: 1,
+        limit: 20
+    });
+
     // Hook for managing artwork data and pagination
     const {
         artworks,      // Array of loaded artworks
@@ -29,7 +36,7 @@ export function ExploreContent() {
         hasMore,       // Whether there are more pages to load
         loadMore,      // Function to load next page
         retry          // Function to retry after error
-    } = useArtworks();
+    } = useArtworks({ filters: currentFilters });
 
     // Hook for infinite scroll functionality
     const { triggerRef } = useInfiniteScroll({
@@ -54,6 +61,9 @@ export function ExploreContent() {
 
     return (
         <div className="space-y-6">
+            {/* Filters bar */}
+            <FiltersBar onFiltersChange={setCurrentFilters} />
+
             {/* Main artwork grid with loading states */}
             <ArtworkGrid
                 artworks={artworks}

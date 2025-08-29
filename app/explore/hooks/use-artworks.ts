@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { fetchArtworks } from '@/services/aic';
-import { Artwork } from '@/models';
+import { Artwork, Filters } from '@/models';
 
 /**
  * Return type for the useArtworks hook
@@ -38,7 +38,11 @@ interface UseArtworksReturn {
  */
 // No localStorage - fresh start on each page load
 
-export function useArtworks(): UseArtworksReturn {
+interface UseArtworksParams {
+    filters?: Filters;
+}
+
+export function useArtworks({ filters = {} }: UseArtworksParams = {}): UseArtworksReturn {
     // State for the loaded artworks array
     const [artworks, setArtworks] = useState<Artwork[]>([]);
     // Loading states
@@ -70,11 +74,11 @@ export function useArtworks(): UseArtworksReturn {
 
             console.log(`Loading artworks page ${pageNum}...`);
 
-            // Fetch artworks from the API with pagination
+            // Fetch artworks from the API with pagination and filters
             const response = await fetchArtworks({
+                ...filters,
                 page: pageNum,
                 limit: 20,        // Load 20 artworks per page
-                sort: 'recent'    // Sort by most recent first
             });
 
             // Filter out artworks without valid images (required for display)
@@ -118,7 +122,7 @@ export function useArtworks(): UseArtworksReturn {
             // Clear the concurrent loading protection
             isLoadingMoreRef.current = false;
         }
-    }, []);
+    }, [filters]);
 
     /**
  * Function to load the next page of artworks (for infinite scroll)
@@ -147,11 +151,13 @@ export function useArtworks(): UseArtworksReturn {
         loadArtworks(1, false); // Start fresh from page 1
     }, [loadArtworks]);
 
-    // Load initial data when the hook is first used
+    // Load initial data when the hook is first used or when filters change
     useEffect(() => {
+        setPage(1); // Reset to first page
+        setHasMore(true); // Reset hasMore state
         loadArtworks(1, false); // Load first page
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Empty dependency array - only run once on mount
+    }, [filters]); // Reload when filters change
 
     return {
         artworks,

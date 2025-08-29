@@ -1,6 +1,7 @@
 import { Artwork, ArtworkRaw, Filters, Paginated, AicApiResponse } from '@/models';
 
 const AIC_BASE_URL = 'https://api.artic.edu/api/v1/artworks';
+const AIC_SEARCH_URL = 'https://api.artic.edu/api/v1/artworks/search';
 
 // Required fields for the API
 const REQUIRED_FIELDS = [
@@ -81,45 +82,6 @@ function buildApiQuery(filters: Filters = {}): URLSearchParams {
     params.set('page', page.toString());
     params.set('limit', limit.toString());
 
-    // Sorting - default to most recent
-    const sort = filters.sort || 'recent';
-    if (sort === 'recent') {
-        // Sort by date_end descending, then date_start descending
-        params.set('sort', '-date_end,-date_start');
-    } else if (sort === 'oldest') {
-        // Sort by date_start ascending, then date_end ascending
-        params.set('sort', 'date_start,date_end');
-    }
-
-    // Period filter
-    if (filters.period) {
-        const { start, end } = filters.period;
-        // Filter by date range (using both date_start and date_end)
-        params.set('q', `date_start:[${start} TO ${end}] OR date_end:[${start} TO ${end}]`);
-    }
-
-    // Movement filter (style_title)
-    if (filters.movements && filters.movements.length > 0) {
-        const movementQuery = filters.movements
-            .map(movement => `"${movement}"`)
-            .join(' OR ');
-        const existingQuery = params.get('q');
-        const combinedQuery = existingQuery
-            ? `(${existingQuery}) AND (style_title:(${movementQuery}))`
-            : `style_title:(${movementQuery})`;
-        params.set('q', combinedQuery);
-    }
-
-    // Artist filter
-    if (filters.artist) {
-        const artistQuery = `artist_title:"${filters.artist}"`;
-        const existingQuery = params.get('q');
-        const combinedQuery = existingQuery
-            ? `(${existingQuery}) AND (${artistQuery})`
-            : artistQuery;
-        params.set('q', combinedQuery);
-    }
-
     return params;
 }
 
@@ -127,6 +89,49 @@ function buildApiQuery(filters: Filters = {}): URLSearchParams {
  * Fetch artworks from Art Institute of Chicago API
  */
 export async function fetchArtworks(filters: Filters = {}): Promise<Paginated<Artwork>> {
+    // Use search API if artwork type filter is present
+    if (filters.artworkType) {
+        const searchQuery = {
+            query: {
+                bool: {
+                    must: [
+                        { term: { 'artwork_type_title.keyword': filters.artworkType } }
+                    ]
+                }
+            },
+            fields: REQUIRED_FIELDS,
+            page: filters.page || 1,
+            limit: filters.limit || 20
+        };
+
+        try {
+            const response = await fetch(AIC_SEARCH_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(searchQuery),
+            });
+
+            if (!response.ok) {
+                throw new Error(`AIC Search API error: ${response.status} ${response.statusText}`);
+            }
+
+            const data: AicApiResponse = await response.json();
+            const artworks = data.data.map(mapArtwork);
+
+            return {
+                data: artworks,
+                pagination: data.pagination,
+                info: data.info,
+            };
+        } catch (error) {
+            console.error('Failed to fetch artworks with search:', error);
+            throw new Error('Failed to fetch artworks from Art Institute of Chicago');
+        }
+    }
+
+    // Use regular API when no artwork type filter
     const queryParams = buildApiQuery(filters);
     const url = `${AIC_BASE_URL}?${queryParams.toString()}`;
 

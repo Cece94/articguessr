@@ -1,12 +1,8 @@
+import { ArtworkType } from './artwork-type';
+
 // Filter parameters
 export interface Filters {
-    period?: {
-        start: number;
-        end: number;
-    };
-    movements?: string[];
-    artist?: string;
-    sort?: 'recent' | 'oldest';
+    artworkType?: ArtworkType;
     page?: number;
     limit?: number;
 }
