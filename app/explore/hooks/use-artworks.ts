@@ -36,72 +36,19 @@ interface UseArtworksReturn {
  * 
  * @returns Object containing artworks data, loading states, and control functions
  */
-/**
- * Simple persistence helper for artwork state
- */
-const STORAGE_KEY = 'explore-artworks-state';
-
-interface PersistedState {
-    artworks: Artwork[];
-    page: number;
-    hasMore: boolean;
-    timestamp: number;
-}
-
-const saveToStorage = (artworks: Artwork[], page: number, hasMore: boolean) => {
-    try {
-        const state: PersistedState = {
-            artworks,
-            page,
-            hasMore,
-            timestamp: Date.now()
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-        console.warn('Failed to save artworks state:', error);
-    }
-};
-
-const loadFromStorage = (): PersistedState | null => {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) return null;
-
-        const state: PersistedState = JSON.parse(stored);
-        // Only use cached data if it's less than 10 minutes old
-        const maxAge = 10 * 60 * 1000; // 10 minutes
-        if (Date.now() - state.timestamp > maxAge) {
-            localStorage.removeItem(STORAGE_KEY);
-            return null;
-        }
-
-        return state;
-    } catch (error) {
-        console.warn('Failed to load artworks state:', error);
-        try {
-            localStorage.removeItem(STORAGE_KEY);
-        } catch {
-            // Ignore cleanup errors
-        }
-        return null;
-    }
-};
+// No localStorage - fresh start on each page load
 
 export function useArtworks(): UseArtworksReturn {
-    // State for the loaded artworks array - start with empty array (consistent SSR/client)
+    // State for the loaded artworks array
     const [artworks, setArtworks] = useState<Artwork[]>([]);
-    // Loading state for initial data load
+    // Loading states
     const [isLoading, setIsLoading] = useState(true);
-    // Loading state for additional pages (infinite scroll)
     const [isLoadingMore, setIsLoadingMore] = useState(false);
-    // Error state - contains error message or null
+    // Error handling
     const [error, setError] = useState<string | null>(null);
-    // Current page number for pagination
+    // Pagination
     const [page, setPage] = useState(1);
-    // Whether there are more pages available to load
     const [hasMore, setHasMore] = useState(true);
-    // Track if we've already tried to restore from localStorage
-    const [hasAttemptedRestore, setHasAttemptedRestore] = useState(false);
     // Prevent multiple concurrent loadMore calls
     const isLoadingMoreRef = useRef(false);
 
@@ -154,16 +101,11 @@ export function useArtworks(): UseArtworksReturn {
                     // Return combined array
                     const updatedArtworks = [...prev, ...newArtworks];
 
-                    // Save to localStorage with updated state
-                    saveToStorage(updatedArtworks, pageNum, newHasMore);
-
                     return updatedArtworks;
                 });
             } else {
                 // Replace mode: replace all artworks (initial load or retry)
                 setArtworks(validArtworks);
-                // Save to localStorage
-                saveToStorage(validArtworks, pageNum, newHasMore);
             }
 
         } catch (err) {
@@ -205,32 +147,11 @@ export function useArtworks(): UseArtworksReturn {
         loadArtworks(1, false); // Start fresh from page 1
     }, [loadArtworks]);
 
-    // Restore state from localStorage on client-side only (prevents hydration mismatch)
+    // Load initial data when the hook is first used
     useEffect(() => {
-        if (hasAttemptedRestore) return;
-
-        const restoredState = loadFromStorage();
-        if (restoredState) {
-            console.log('Restoring state from localStorage:', restoredState.artworks.length, 'artworks');
-            setArtworks(restoredState.artworks);
-            setPage(restoredState.page);
-            setHasMore(restoredState.hasMore);
-            setIsLoading(false); // Don't show loading if we have restored data
-        }
-
-        setHasAttemptedRestore(true);
-    }, [hasAttemptedRestore]);
-
-    // Load initial data when the hook is first used (only if no restored state)
-    useEffect(() => {
-        if (!hasAttemptedRestore) return; // Wait for restore attempt first
-
-        // Only load from API if we don't have any artworks (no restored state)
-        if (artworks.length === 0) {
-            loadArtworks(1, false); // Load first page, replace any existing data
-        }
+        loadArtworks(1, false); // Load first page
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [hasAttemptedRestore]); // Trigger after restore attempt
+    }, []); // Empty dependency array - only run once on mount
 
     return {
         artworks,
