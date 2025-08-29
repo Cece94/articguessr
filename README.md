@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ArticGuessr
 
-## Getting Started
+Un jeu de géolocalisation inspiré de GeoGuessr, développé avec Next.js 15 et React 19.
 
-First, run the development server:
+## 🌟 Fonctionnalités
+
+- Interface moderne avec support du mode sombre/clair
+- Navigation intuitive entre les différentes sections
+- Design responsive optimisé pour tous les appareils
+- Architecture basée sur Next.js App Router
+
+## 🚀 Pages disponibles
+
+- **Accueil** - Page d'accueil principale
+- **Guessr** - Jeu de géolocalisation principal
+- **Explorer** - Exploration des différentes cartes et lieux
+- **À propos** - Informations sur le projet
+
+## 🛠️ Technologies utilisées
+
+- **Next.js 15** - Framework React avec App Router
+- **React 19** - Bibliothèque UI
+- **TypeScript** - Typage statique
+- **Tailwind CSS 4** - Framework CSS utilitaire
+- **Radix UI** - Composants UI accessibles
+- **Lucide React** - Icônes modernes
+- **next-themes** - Gestion des thèmes sombre/clair
+
+## 📦 Installation
 
 ```bash
+# Cloner le projet
+git clone https://github.com/Cece94/articguessr.git
+cd articguessr
+
+# Installer les dépendances
+npm install
+
+# Lancer le serveur de développement
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur pour voir le résultat.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔧 Scripts disponibles
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev        # Lancer le serveur de développement avec Turbopack
+npm run build      # Construire l'application pour la production
+npm run start      # Lancer l'application en mode production
+npm run lint       # Vérifier le code avec ESLint
+```
 
-## Learn More
+## 📱 Structure du projet
 
-To learn more about Next.js, take a look at the following resources:
+```
+articguessr/
+├── app/                 # Pages et layouts (App Router)
+│   ├── about/          # Page À propos
+│   ├── explore/        # Page Explorer
+│   ├── guessr/         # Page de jeu principale
+│   ├── layout.tsx      # Layout principal
+│   └── page.tsx        # Page d'accueil
+├── components/         # Composants réutilisables
+│   ├── ui/            # Composants UI de base
+│   ├── header.tsx     # En-tête de navigation
+│   ├── footer.tsx     # Pied de page
+│   └── theme-provider.tsx # Fournisseur de thème
+├── lib/               # Utilitaires et helpers
+└── public/            # Assets statiques
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌙 Thèmes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+L'application supporte les modes sombre et clair avec une transition fluide. Le thème est persisté automatiquement entre les sessions.
 
-## Deploy on Vercel
+## 🚀 Déploiement
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Le moyen le plus simple de déployer votre application Next.js est d'utiliser la [plateforme Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Consultez la [documentation de déploiement Next.js](https://nextjs.org/docs/app/building-your-application/deploying) pour plus de détails.
+
+## 📄 Licence
+
+Ce projet est sous licence MIT.
