@@ -33,7 +33,7 @@ export default function AboutPage() {
                         </h2>
                         <div className="prose prose-neutral dark:prose-invert max-w-none">
                             <p className="text-muted-foreground">
-                                All artwork images are served via the Art Institute of Chicago's IIIF service.
+                                All artwork images are served via the Art Institute of Chicago&apos;s IIIF service.
                                 Individual image credits and copyright information are displayed with each artwork
                                 when available.
                             </p>
