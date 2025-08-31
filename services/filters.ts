@@ -16,6 +16,12 @@ export function buildQueryFromFilters(filters: Filters): URLSearchParams {
         params.set('cultureOrStyle', filters.cultureOrStyle);
     }
 
+    // Year range filter
+    if (filters.yearRange) {
+        params.set('yearStart', filters.yearRange.start.toString());
+        params.set('yearEnd', filters.yearRange.end.toString());
+    }
+
     // Pagination
     if (filters.page && filters.page > 1) {
         params.set('page', filters.page.toString());
@@ -44,6 +50,17 @@ export function parseFiltersFromSearchParams(searchParams: URLSearchParams): Fil
     const cultureOrStyle = searchParams.get('cultureOrStyle');
     if (cultureOrStyle && Object.values(CultureOrStyle).includes(cultureOrStyle as CultureOrStyle)) {
         filters.cultureOrStyle = cultureOrStyle as CultureOrStyle;
+    }
+
+    // Year range filter
+    const yearStart = searchParams.get('yearStart');
+    const yearEnd = searchParams.get('yearEnd');
+    if (yearStart && yearEnd) {
+        const start = parseInt(yearStart, 10);
+        const end = parseInt(yearEnd, 10);
+        if (!isNaN(start) && !isNaN(end)) {
+            filters.yearRange = { start, end };
+        }
     }
 
     // Pagination

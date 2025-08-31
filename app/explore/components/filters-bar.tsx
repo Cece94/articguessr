@@ -3,7 +3,8 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArtworkTypeFilter } from './artwork-type-filter';
 import { CultureOrStyleFilter } from './culture-or-style-filter';
-import { ArtworkType, CultureOrStyle } from '@/models';
+import { YearRangeFilter } from './year-range-filter';
+import { ArtworkType, CultureOrStyle, YearRange } from '@/models';
 import { buildQueryFromFilters, parseFiltersFromSearchParams, getDefaultFilters } from '@/services/filters';
 
 export function FiltersBar() {
@@ -14,6 +15,7 @@ export function FiltersBar() {
     const currentFilters = parseFiltersFromSearchParams(searchParams);
     const artworkType = currentFilters.artworkType;
     const cultureOrStyle = currentFilters.cultureOrStyle;
+    const yearRange = currentFilters.yearRange;
 
     const handleArtworkTypeChange = (newArtworkType: ArtworkType | undefined) => {
         const newFilters = {
@@ -39,11 +41,23 @@ export function FiltersBar() {
         router.push(newUrl);
     };
 
+    const handleYearRangeChange = (newYearRange: YearRange | undefined) => {
+        const newFilters = {
+            ...getDefaultFilters(),
+            ...currentFilters,
+            yearRange: newYearRange,
+        };
+
+        const params = buildQueryFromFilters(newFilters);
+        const newUrl = params.toString() ? `/explore?${params.toString()}` : '/explore';
+        router.push(newUrl);
+    };
+
     const handleClearFilters = () => {
         router.push('/explore');
     };
 
-    const hasActiveFilters = !!(artworkType || cultureOrStyle);
+    const hasActiveFilters = !!(artworkType || cultureOrStyle || yearRange);
 
     return (
         <div className="bg-background border border-border rounded-lg p-6 mb-6">
@@ -66,6 +80,10 @@ export function FiltersBar() {
                 <CultureOrStyleFilter
                     value={cultureOrStyle}
                     onValueChange={handleCultureOrStyleChange}
+                />
+                <YearRangeFilter
+                    value={yearRange}
+                    onValueChange={handleYearRangeChange}
                 />
             </div>
         </div>

@@ -90,7 +90,7 @@ function buildApiQuery(filters: Filters = {}): URLSearchParams {
  */
 export async function fetchArtworks(filters: Filters = {}): Promise<Paginated<Artwork>> {
     // Use search API if any filter is present
-    if (filters.artworkType || filters.cultureOrStyle) {
+    if (filters.artworkType || filters.cultureOrStyle || filters.yearRange) {
         const mustClauses: any[] = [];
 
         if (filters.artworkType) {
@@ -99,6 +99,11 @@ export async function fetchArtworks(filters: Filters = {}): Promise<Paginated<Ar
 
         if (filters.cultureOrStyle) {
             mustClauses.push({ term: { 'style_title.keyword': filters.cultureOrStyle } });
+        }
+
+        if (filters.yearRange) {
+            mustClauses.push({ range: { 'date_end': { gte: filters.yearRange.start } } });
+            mustClauses.push({ range: { 'date_start': { lte: filters.yearRange.end } } });
         }
 
         const searchQuery = {
