@@ -1,31 +1,31 @@
 "use client";
 
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArtworkTypeFilter } from './artwork-type-filter';
-import { ArtworkType, Filters } from '@/models';
+import { ArtworkType } from '@/models';
+import { buildQueryFromFilters, parseFiltersFromSearchParams, getDefaultFilters } from '@/services/filters';
 
-interface FiltersBarProps {
-    onFiltersChange: (filters: Filters) => void;
-}
+export function FiltersBar() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
-export function FiltersBar({ onFiltersChange }: FiltersBarProps) {
-    const [artworkType, setArtworkType] = useState<ArtworkType | undefined>();
+    // Get current filters from URL
+    const currentFilters = parseFiltersFromSearchParams(searchParams);
+    const artworkType = currentFilters.artworkType;
 
     const handleArtworkTypeChange = (newArtworkType: ArtworkType | undefined) => {
-        setArtworkType(newArtworkType);
-        onFiltersChange({
+        const newFilters = {
+            ...getDefaultFilters(),
             artworkType: newArtworkType,
-            page: 1, // Reset to first page when filter changes
-            limit: 20
-        });
+        };
+
+        const params = buildQueryFromFilters(newFilters);
+        const newUrl = params.toString() ? `/explore?${params.toString()}` : '/explore';
+        router.push(newUrl);
     };
 
     const handleClearFilters = () => {
-        setArtworkType(undefined);
-        onFiltersChange({
-            page: 1,
-            limit: 20
-        });
+        router.push('/explore');
     };
 
     const hasActiveFilters = !!artworkType;
@@ -33,7 +33,6 @@ export function FiltersBar({ onFiltersChange }: FiltersBarProps) {
     return (
         <div className="bg-background border border-border rounded-lg p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Filters</h2>
                 {hasActiveFilters && (
                     <button
                         onClick={handleClearFilters}

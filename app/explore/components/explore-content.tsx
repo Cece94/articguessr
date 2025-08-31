@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useArtworks } from '../hooks/use-artworks';
 import { useInfiniteScroll } from '../hooks/use-infinite-scroll';
 import { ArtworkGrid } from './artwork-grid';
@@ -8,6 +9,7 @@ import { ErrorState } from './error-state';
 import { InfiniteScrollTrigger } from './infinite-scroll-trigger';
 import { FiltersBar } from './filters-bar';
 import { Artwork, Filters } from '@/models';
+import { parseFiltersFromSearchParams, getDefaultFilters } from '@/services/filters';
 
 /**
  * Main content component for the Explore page
@@ -22,10 +24,18 @@ import { Artwork, Filters } from '@/models';
  * keeping the component itself focused on rendering the UI.
  */
 export function ExploreContent() {
-    const [currentFilters, setCurrentFilters] = useState<Filters>({
-        page: 1,
-        limit: 20
+    const searchParams = useSearchParams();
+    const [currentFilters, setCurrentFilters] = useState<Filters>(() => {
+        const urlFilters = parseFiltersFromSearchParams(searchParams);
+        return Object.keys(urlFilters).length > 0 ? { ...getDefaultFilters(), ...urlFilters } : getDefaultFilters();
     });
+
+    // Sync filters when URL changes
+    useEffect(() => {
+        const urlFilters = parseFiltersFromSearchParams(searchParams);
+        const newFilters = Object.keys(urlFilters).length > 0 ? { ...getDefaultFilters(), ...urlFilters } : getDefaultFilters();
+        setCurrentFilters(newFilters);
+    }, [searchParams]);
 
     // Hook for managing artwork data and pagination
     const {
@@ -62,7 +72,7 @@ export function ExploreContent() {
     return (
         <div className="space-y-6">
             {/* Filters bar */}
-            <FiltersBar onFiltersChange={setCurrentFilters} />
+            <FiltersBar />
 
             {/* Main artwork grid with loading states */}
             <ArtworkGrid

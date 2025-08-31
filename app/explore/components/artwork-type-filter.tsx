@@ -75,3 +75,4 @@ export function ArtworkTypeFilter({ value, onValueChange }: ArtworkTypeFilterPro
         </div>
     );
 }
+
