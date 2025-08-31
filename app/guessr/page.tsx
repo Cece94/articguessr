@@ -25,11 +25,11 @@ export default function GuessrPage() {
     const [result, setResult] = useState<GuessResult | null>(null);
 
     const loadNewArtwork = async () => {
-        setLoading(true);
-        setError(null);
+        // Reset form without showing loading state
         setArtistGuess('');
         setYearGuess('');
         setResult(null);
+        setError(null);
 
         try {
             const newArtwork = await fetchRandomArtwork();
@@ -37,14 +37,13 @@ export default function GuessrPage() {
         } catch (err) {
             setError('Failed to load artwork. Please try again.');
             console.error('Error loading artwork:', err);
-        } finally {
-            setLoading(false);
         }
     };
 
     // Load initial artwork
     useEffect(() => {
-        loadNewArtwork();
+        setLoading(true);
+        loadNewArtwork().finally(() => setLoading(false));
     }, []);
 
     const handleSubmit = () => {
@@ -221,13 +220,22 @@ export default function GuessrPage() {
 
                         <div className="space-y-3">
                             {!result?.submitted ? (
-                                <Button
-                                    onClick={handleSubmit}
-                                    disabled={isSubmitDisabled}
-                                    className="w-full"
-                                >
-                                    Submit Guess
-                                </Button>
+                                <>
+                                    <Button
+                                        onClick={handleSubmit}
+                                        disabled={isSubmitDisabled}
+                                        className="w-full"
+                                    >
+                                        Submit Guess
+                                    </Button>
+                                    <Button
+                                        onClick={loadNewArtwork}
+                                        variant="outline"
+                                        className="w-full"
+                                    >
+                                        Skip this artwork
+                                    </Button>
+                                </>
                             ) : (
                                 <Button
                                     onClick={loadNewArtwork}
