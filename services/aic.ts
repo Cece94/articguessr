@@ -107,7 +107,7 @@ export async function fetchRandomArtwork(): Promise<Artwork> {
                     bool: {
                         must: [
                             { term: { 'artwork_type_title.keyword': randomType } },
-                            { range: { 'date_start': { gte: 1900 } } }
+                            { range: { 'date_start': { gte: 1860 } } }
                         ]
                     }
                 },
