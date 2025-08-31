@@ -125,17 +125,20 @@ export default function GuessrPage() {
                 <div className="grid md:grid-cols-2 gap-8">
                     {/* Artwork Display */}
                     <div className="space-y-4">
-                        <div className="relative aspect-square w-full max-w-md mx-auto">
+                        <div className="w-full max-w-md mx-auto bg-muted rounded-lg overflow-hidden" style={{ height: '400px' }}>
                             {artwork.imageUrl ? (
-                                <Image
-                                    src={artwork.imageUrl}
-                                    alt="Artwork to guess"
-                                    fill
-                                    className="object-contain rounded-lg"
-                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                />
+                                <div className="relative w-full h-full flex items-center justify-center">
+                                    <Image
+                                        src={artwork.imageUrl}
+                                        alt="Artwork to guess"
+                                        width={400}
+                                        height={400}
+                                        className="max-w-full max-h-full object-contain"
+                                        sizes="400px"
+                                    />
+                                </div>
                             ) : (
-                                <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
+                                <div className="w-full h-full flex items-center justify-center">
                                     <p className="text-muted-foreground">No image available</p>
                                 </div>
                             )}
