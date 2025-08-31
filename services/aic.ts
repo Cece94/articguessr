@@ -89,14 +89,22 @@ function buildApiQuery(filters: Filters = {}): URLSearchParams {
  * Fetch artworks from Art Institute of Chicago API
  */
 export async function fetchArtworks(filters: Filters = {}): Promise<Paginated<Artwork>> {
-    // Use search API if artwork type filter is present
-    if (filters.artworkType) {
+    // Use search API if any filter is present
+    if (filters.artworkType || filters.cultureOrStyle) {
+        const mustClauses: any[] = [];
+
+        if (filters.artworkType) {
+            mustClauses.push({ term: { 'artwork_type_title.keyword': filters.artworkType } });
+        }
+
+        if (filters.cultureOrStyle) {
+            mustClauses.push({ term: { 'style_title.keyword': filters.cultureOrStyle } });
+        }
+
         const searchQuery = {
             query: {
                 bool: {
-                    must: [
-                        { term: { 'artwork_type_title.keyword': filters.artworkType } }
-                    ]
+                    must: mustClauses
                 }
             },
             fields: REQUIRED_FIELDS,

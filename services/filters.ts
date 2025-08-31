@@ -1,4 +1,4 @@
-import { Filters, ArtworkType } from '@/models';
+import { Filters, ArtworkType, CultureOrStyle } from '@/models';
 
 /**
  * Build URL search parameters from filters object
@@ -10,6 +10,12 @@ export function buildQueryFromFilters(filters: Filters): URLSearchParams {
     if (filters.artworkType) {
         params.set('artworkType', filters.artworkType);
     }
+
+    // Culture or style filter
+    if (filters.cultureOrStyle) {
+        params.set('cultureOrStyle', filters.cultureOrStyle);
+    }
+
     // Pagination
     if (filters.page && filters.page > 1) {
         params.set('page', filters.page.toString());
@@ -32,6 +38,12 @@ export function parseFiltersFromSearchParams(searchParams: URLSearchParams): Fil
     const artworkType = searchParams.get('artworkType');
     if (artworkType && Object.values(ArtworkType).includes(artworkType as ArtworkType)) {
         filters.artworkType = artworkType as ArtworkType;
+    }
+
+    // Culture or style filter
+    const cultureOrStyle = searchParams.get('cultureOrStyle');
+    if (cultureOrStyle && Object.values(CultureOrStyle).includes(cultureOrStyle as CultureOrStyle)) {
+        filters.cultureOrStyle = cultureOrStyle as CultureOrStyle;
     }
 
     // Pagination

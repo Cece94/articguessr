@@ -2,7 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArtworkTypeFilter } from './artwork-type-filter';
-import { ArtworkType } from '@/models';
+import { CultureOrStyleFilter } from './culture-or-style-filter';
+import { ArtworkType, CultureOrStyle } from '@/models';
 import { buildQueryFromFilters, parseFiltersFromSearchParams, getDefaultFilters } from '@/services/filters';
 
 export function FiltersBar() {
@@ -12,11 +13,25 @@ export function FiltersBar() {
     // Get current filters from URL
     const currentFilters = parseFiltersFromSearchParams(searchParams);
     const artworkType = currentFilters.artworkType;
+    const cultureOrStyle = currentFilters.cultureOrStyle;
 
     const handleArtworkTypeChange = (newArtworkType: ArtworkType | undefined) => {
         const newFilters = {
             ...getDefaultFilters(),
+            ...currentFilters,
             artworkType: newArtworkType,
+        };
+
+        const params = buildQueryFromFilters(newFilters);
+        const newUrl = params.toString() ? `/explore?${params.toString()}` : '/explore';
+        router.push(newUrl);
+    };
+
+    const handleCultureOrStyleChange = (newCultureOrStyle: CultureOrStyle | undefined) => {
+        const newFilters = {
+            ...getDefaultFilters(),
+            ...currentFilters,
+            cultureOrStyle: newCultureOrStyle,
         };
 
         const params = buildQueryFromFilters(newFilters);
@@ -28,7 +43,7 @@ export function FiltersBar() {
         router.push('/explore');
     };
 
-    const hasActiveFilters = !!artworkType;
+    const hasActiveFilters = !!(artworkType || cultureOrStyle);
 
     return (
         <div className="bg-background border border-border rounded-lg p-6 mb-6">
@@ -47,6 +62,10 @@ export function FiltersBar() {
                 <ArtworkTypeFilter
                     value={artworkType}
                     onValueChange={handleArtworkTypeChange}
+                />
+                <CultureOrStyleFilter
+                    value={cultureOrStyle}
+                    onValueChange={handleCultureOrStyleChange}
                 />
             </div>
         </div>
