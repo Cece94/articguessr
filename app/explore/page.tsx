@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ExploreContent } from "./components/explore-content";
 
 export default function ExplorePage() {
@@ -12,7 +13,9 @@ export default function ExplorePage() {
                         Discover artworks from the Art Institute of Chicago collection
                     </p>
                 </div>
-                <ExploreContent />
+                <Suspense fallback={<div>Loading...</div>}>
+                    <ExploreContent />
+                </Suspense>
             </div>
         </div>
     );
