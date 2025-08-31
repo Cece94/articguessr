@@ -8,6 +8,7 @@ import { ArtworkGrid } from './artwork-grid';
 import { ErrorState } from './error-state';
 import { InfiniteScrollTrigger } from './infinite-scroll-trigger';
 import { FiltersBar } from './filters-bar';
+import { ArtworkDetailModal } from './artwork-detail-modal';
 import { Artwork, Filters } from '@/models';
 import { parseFiltersFromSearchParams, getDefaultFilters } from '@/services/filters';
 
@@ -29,6 +30,10 @@ export function ExploreContent() {
         const urlFilters = parseFiltersFromSearchParams(searchParams);
         return Object.keys(urlFilters).length > 0 ? { ...getDefaultFilters(), ...urlFilters } : getDefaultFilters();
     });
+
+    // Modal state
+    const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Sync filters when URL changes
     useEffect(() => {
@@ -57,11 +62,20 @@ export function ExploreContent() {
 
     /**
      * Handles clicking on an artwork card
-     * Currently just logs the artwork, but will open a detail modal in future features
+     * Opens the detail modal with the selected artwork
      */
     const handleArtworkClick = (artwork: Artwork) => {
-        // TODO: Open detail modal in future feature
-        console.log('Artwork clicked:', artwork.title);
+        setSelectedArtwork(artwork);
+        setIsModalOpen(true);
+    };
+
+    /**
+     * Handles closing the modal
+     * Resets the selected artwork and closes the modal
+     */
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedArtwork(null);
     };
 
     // Show error state if initial load failed and no artworks are loaded
@@ -111,6 +125,13 @@ export function ExploreContent() {
                     </button>
                 </div>
             )}
+
+            {/* Artwork detail modal */}
+            <ArtworkDetailModal
+                artwork={selectedArtwork}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+            />
         </div>
     );
 }
