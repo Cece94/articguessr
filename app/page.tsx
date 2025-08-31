@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { fetchRandomArtwork } from "@/services/aic";
 import { Artwork } from "@/models/artwork";
@@ -83,9 +84,11 @@ export default function Home() {
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <div className="relative bg-background rounded-3xl p-4">
-                  <img
+                  <Image
                     src={featuredArtwork.imageUrl}
                     alt={featuredArtwork.title}
+                    width={320}
+                    height={320}
                     className="w-80 h-80 object-cover rounded-2xl shadow-2xl"
                   />
                   <div className="mt-4 text-center">
@@ -140,7 +143,7 @@ export default function Home() {
               </div>
               <h3 className="text-lg font-semibold mb-2">Art Institute Collection</h3>
               <p className="text-sm text-muted-foreground">
-                Access to over 300,000 artworks from one of the world's premier art museums.
+                Access to over 300,000 artworks from one of the world&apos;s premier art museums.
               </p>
             </div>
           </div>
@@ -149,7 +152,7 @@ export default function Home() {
         {/* Bottom Quote */}
         <div className="text-center mt-16">
           <blockquote className="text-lg italic text-muted-foreground max-w-2xl mx-auto">
-            "Art enables us to find ourselves and lose ourselves at the same time."
+            &ldquo;Art enables us to find ourselves and lose ourselves at the same time.&rdquo;
           </blockquote>
           <cite className="text-sm text-muted-foreground mt-2 block">— Thomas Merton</cite>
         </div>
