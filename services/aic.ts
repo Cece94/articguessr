@@ -86,6 +86,41 @@ function buildApiQuery(filters: Filters = {}): URLSearchParams {
 }
 
 /**
+ * Fetch a random artwork from Art Institute of Chicago API
+ */
+export async function fetchRandomArtwork(): Promise<Artwork> {
+    // Get a random page number between 1 and 100 to get variety
+    const randomPage = Math.floor(Math.random() * 100) + 1;
+
+    const params = new URLSearchParams();
+    params.set('has_image', '1');
+    params.set('fields', REQUIRED_FIELDS.join(','));
+    params.set('page', randomPage.toString());
+    params.set('limit', '1');
+
+    const url = `${AIC_BASE_URL}?${params.toString()}`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`AIC API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data: AicApiResponse = await response.json();
+
+        if (!data.data || data.data.length === 0) {
+            throw new Error('No artwork found');
+        }
+
+        return mapArtwork(data.data[0]);
+    } catch (error) {
+        console.error('Failed to fetch random artwork:', error);
+        throw new Error('Failed to fetch random artwork from Art Institute of Chicago');
+    }
+}
+
+/**
  * Fetch artworks from Art Institute of Chicago API
  */
 export async function fetchArtworks(filters: Filters = {}): Promise<Paginated<Artwork>> {
