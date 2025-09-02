@@ -3,10 +3,10 @@ import {
     buildQueryFromFilters,
     parseFiltersFromSearchParams,
     updateUrlWithFilters,
-    getDefaultFilters,
-    hasActiveFilters
+    getDefaultFilters
 } from '../filters';
 import type { Filters } from '@/models';
+import { ArtworkType, CultureOrStyle } from '@/models';
 
 describe('filters service', () => {
     describe('buildQueryFromFilters', () => {
@@ -15,68 +15,32 @@ describe('filters service', () => {
             expect(params.toString()).toBe('');
         });
 
-        it('should build params for period filter', () => {
+        it('should build params for artwork type filter', () => {
             const filters: Filters = {
-                period: { start: 1800, end: 1900 }
+                artworkType: ArtworkType.Painting
             };
             const params = buildQueryFromFilters(filters);
 
-            expect(params.get('period_start')).toBe('1800');
-            expect(params.get('period_end')).toBe('1900');
+            expect(params.get('artworkType')).toBe(ArtworkType.Painting);
         });
 
-        it('should build params for movements filter', () => {
+        it('should build params for culture or style filter', () => {
             const filters: Filters = {
-                movements: ['Impressionism', 'Post-Impressionism']
+                cultureOrStyle: CultureOrStyle.Impressionism
             };
             const params = buildQueryFromFilters(filters);
 
-            expect(params.get('movements')).toBe('Impressionism,Post-Impressionism');
+            expect(params.get('cultureOrStyle')).toBe(CultureOrStyle.Impressionism);
         });
 
-        it('should build params for artist filter', () => {
+        it('should build params for year range filter', () => {
             const filters: Filters = {
-                artist: 'Vincent van Gogh'
+                yearRange: { start: 1800, end: 1900 }
             };
             const params = buildQueryFromFilters(filters);
 
-            expect(params.get('artist')).toBe('Vincent van Gogh');
-        });
-
-        it('should handle artist filter with whitespace', () => {
-            const filters: Filters = {
-                artist: '  Claude Monet  '
-            };
-            const params = buildQueryFromFilters(filters);
-
-            expect(params.get('artist')).toBe('Claude Monet');
-        });
-
-        it('should skip empty artist filter', () => {
-            const filters: Filters = {
-                artist: '   '
-            };
-            const params = buildQueryFromFilters(filters);
-
-            expect(params.get('artist')).toBe(null);
-        });
-
-        it('should build params for sort filter (non-default)', () => {
-            const filters: Filters = {
-                sort: 'oldest'
-            };
-            const params = buildQueryFromFilters(filters);
-
-            expect(params.get('sort')).toBe('oldest');
-        });
-
-        it('should skip default sort filter', () => {
-            const filters: Filters = {
-                sort: 'recent'
-            };
-            const params = buildQueryFromFilters(filters);
-
-            expect(params.get('sort')).toBe(null);
+            expect(params.get('yearStart')).toBe('1800');
+            expect(params.get('yearEnd')).toBe('1900');
         });
 
         it('should build params for pagination', () => {
@@ -103,20 +67,18 @@ describe('filters service', () => {
 
         it('should build params for all filters combined', () => {
             const filters: Filters = {
-                period: { start: 1850, end: 1900 },
-                movements: ['Impressionism'],
-                artist: 'Claude Monet',
-                sort: 'oldest',
+                artworkType: ArtworkType.Sculpture,
+                cultureOrStyle: CultureOrStyle.Bauhaus,
+                yearRange: { start: 1650, end: 1750 },
                 page: 2,
                 limit: 10
             };
             const params = buildQueryFromFilters(filters);
 
-            expect(params.get('period_start')).toBe('1850');
-            expect(params.get('period_end')).toBe('1900');
-            expect(params.get('movements')).toBe('Impressionism');
-            expect(params.get('artist')).toBe('Claude Monet');
-            expect(params.get('sort')).toBe('oldest');
+            expect(params.get('artworkType')).toBe(ArtworkType.Sculpture);
+            expect(params.get('cultureOrStyle')).toBe(CultureOrStyle.Bauhaus);
+            expect(params.get('yearStart')).toBe('1650');
+            expect(params.get('yearEnd')).toBe('1750');
             expect(params.get('page')).toBe('2');
             expect(params.get('limit')).toBe('10');
         });
@@ -127,59 +89,60 @@ describe('filters service', () => {
             const params = new URLSearchParams();
             const filters = parseFiltersFromSearchParams(params);
 
-            expect(filters.sort).toBe('recent'); // default
-            expect(filters.period).toBeUndefined();
-            expect(filters.movements).toBeUndefined();
-            expect(filters.artist).toBeUndefined();
+            expect(filters.artworkType).toBeUndefined();
+            expect(filters.cultureOrStyle).toBeUndefined();
+            expect(filters.yearRange).toBeUndefined();
+            expect(filters.page).toBeUndefined();
+            expect(filters.limit).toBeUndefined();
         });
 
-        it('should parse period filter', () => {
-            const params = new URLSearchParams('period_start=1800&period_end=1900');
+        it('should parse artwork type filter', () => {
+            const params = new URLSearchParams(`artworkType=${ArtworkType.Painting}`);
             const filters = parseFiltersFromSearchParams(params);
 
-            expect(filters.period).toEqual({ start: 1800, end: 1900 });
+            expect(filters.artworkType).toBe(ArtworkType.Painting);
         });
 
-        it('should skip invalid period values', () => {
-            const params = new URLSearchParams('period_start=invalid&period_end=1900');
+        it('should skip invalid artwork type values', () => {
+            const params = new URLSearchParams('artworkType=invalid');
             const filters = parseFiltersFromSearchParams(params);
 
-            expect(filters.period).toBeUndefined();
+            expect(filters.artworkType).toBeUndefined();
         });
 
-        it('should parse movements filter', () => {
-            const params = new URLSearchParams('movements=Impressionism,Post-Impressionism,Cubism');
+        it('should parse culture or style filter', () => {
+            const params = new URLSearchParams(`cultureOrStyle=${CultureOrStyle.Impressionism}`);
             const filters = parseFiltersFromSearchParams(params);
 
-            expect(filters.movements).toEqual(['Impressionism', 'Post-Impressionism', 'Cubism']);
+            expect(filters.cultureOrStyle).toBe(CultureOrStyle.Impressionism);
         });
 
-        it('should handle movements with empty values', () => {
-            const params = new URLSearchParams('movements=Impressionism,,Post-Impressionism,');
+        it('should skip invalid culture or style values', () => {
+            const params = new URLSearchParams('cultureOrStyle=invalid');
             const filters = parseFiltersFromSearchParams(params);
 
-            expect(filters.movements).toEqual(['Impressionism', 'Post-Impressionism']);
+            expect(filters.cultureOrStyle).toBeUndefined();
         });
 
-        it('should parse artist filter', () => {
-            const params = new URLSearchParams('artist=Vincent%20van%20Gogh');
+        it('should parse year range filter', () => {
+            const params = new URLSearchParams('yearStart=1800&yearEnd=1900');
             const filters = parseFiltersFromSearchParams(params);
 
-            expect(filters.artist).toBe('Vincent van Gogh');
+            expect(filters.yearRange).toEqual({ start: 1800, end: 1900 });
         });
 
-        it('should parse sort filter', () => {
-            const params = new URLSearchParams('sort=oldest');
+        it('should skip invalid year range values', () => {
+            const params = new URLSearchParams('yearStart=invalid&yearEnd=1900');
             const filters = parseFiltersFromSearchParams(params);
 
-            expect(filters.sort).toBe('oldest');
+            expect(filters.yearRange).toBeUndefined();
         });
 
-        it('should default to recent sort for invalid values', () => {
-            const params = new URLSearchParams('sort=invalid');
+        it('should skip incomplete year range', () => {
+            const params = new URLSearchParams('yearStart=1800');
             const filters = parseFiltersFromSearchParams(params);
 
-            expect(filters.sort).toBe('recent');
+            expect(filters.yearRange).toBeUndefined();
         });
 
         it('should parse pagination', () => {
@@ -197,6 +160,24 @@ describe('filters service', () => {
             expect(filters.page).toBeUndefined();
             expect(filters.limit).toBeUndefined();
         });
+
+        it('should parse all filters combined', () => {
+            const params = new URLSearchParams([
+                ['artworkType', ArtworkType.Sculpture],
+                ['cultureOrStyle', CultureOrStyle.Bauhaus],
+                ['yearStart', '1650'],
+                ['yearEnd', '1750'],
+                ['page', '2'],
+                ['limit', '10']
+            ]);
+            const filters = parseFiltersFromSearchParams(params);
+
+            expect(filters.artworkType).toBe(ArtworkType.Sculpture);
+            expect(filters.cultureOrStyle).toBe(CultureOrStyle.Bauhaus);
+            expect(filters.yearRange).toEqual({ start: 1650, end: 1750 });
+            expect(filters.page).toBe(2);
+            expect(filters.limit).toBe(10);
+        });
     });
 
     describe('updateUrlWithFilters', () => {
@@ -207,23 +188,25 @@ describe('filters service', () => {
 
         it('should build URL with query parameters', () => {
             const filters: Filters = {
-                period: { start: 1850, end: 1900 },
-                sort: 'oldest'
+                artworkType: ArtworkType.Painting,
+                yearRange: { start: 1850, end: 1900 }
             };
             const url = updateUrlWithFilters(filters, '/explore');
 
             expect(url).toContain('/explore?');
-            expect(url).toContain('period_start=1850');
-            expect(url).toContain('period_end=1900');
-            expect(url).toContain('sort=oldest');
+            expect(url).toContain(`artworkType=${ArtworkType.Painting}`);
+            expect(url).toContain('yearStart=1850');
+            expect(url).toContain('yearEnd=1900');
         });
 
         it('should use default pathname', () => {
-            const filters: Filters = { sort: 'oldest' };
+            const filters: Filters = {
+                cultureOrStyle: CultureOrStyle.Impressionism
+            };
             const url = updateUrlWithFilters(filters);
 
             expect(url).toContain('/explore?');
-            expect(url).toContain('sort=oldest');
+            expect(url).toContain(`cultureOrStyle=${CultureOrStyle.Impressionism}`);
         });
     });
 
@@ -232,70 +215,9 @@ describe('filters service', () => {
             const defaults = getDefaultFilters();
 
             expect(defaults).toEqual({
-                sort: 'recent',
                 page: 1,
                 limit: 20
             });
-        });
-    });
-
-    describe('hasActiveFilters', () => {
-        it('should return false for empty filters', () => {
-            expect(hasActiveFilters({})).toBe(false);
-        });
-
-        it('should return false for default values only', () => {
-            const filters: Filters = {
-                sort: 'recent',
-                page: 1,
-                limit: 20
-            };
-            expect(hasActiveFilters(filters)).toBe(false);
-        });
-
-        it('should return true for period filter', () => {
-            const filters: Filters = {
-                period: { start: 1800, end: 1900 }
-            };
-            expect(hasActiveFilters(filters)).toBe(true);
-        });
-
-        it('should return true for movements filter', () => {
-            const filters: Filters = {
-                movements: ['Impressionism']
-            };
-            expect(hasActiveFilters(filters)).toBe(true);
-        });
-
-        it('should return true for artist filter', () => {
-            const filters: Filters = {
-                artist: 'Claude Monet'
-            };
-            expect(hasActiveFilters(filters)).toBe(true);
-        });
-
-        it('should return false for empty artist string', () => {
-            const filters: Filters = {
-                artist: '   '
-            };
-            expect(hasActiveFilters(filters)).toBe(false);
-        });
-
-        it('should return true for non-default sort', () => {
-            const filters: Filters = {
-                sort: 'oldest'
-            };
-            expect(hasActiveFilters(filters)).toBe(true);
-        });
-
-        it('should return true for any active filter', () => {
-            const filters: Filters = {
-                period: { start: 1800, end: 1900 },
-                movements: ['Impressionism'],
-                artist: 'Claude Monet',
-                sort: 'oldest'
-            };
-            expect(hasActiveFilters(filters)).toBe(true);
         });
     });
 });

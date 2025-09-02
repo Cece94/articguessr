@@ -1,3 +1,9 @@
+/**
+ * Artwork type definitions
+ *
+ * Contains the raw AIC API shape (`ArtworkRaw`) and the normalized model (`Artwork`)
+ * used throughout the app for rendering and gameplay logic.
+ */
 // API response types from Art Institute of Chicago
 export interface ArtworkRaw {
     id: number;
@@ -19,7 +25,7 @@ export interface ArtworkRaw {
     } | null;
 }
 
-// Normalized artwork model for the app
+// Normalized artwork model used by the UI and Guessr
 export interface Artwork {
     id: number;
     imageId: string;

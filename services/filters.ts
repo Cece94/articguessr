@@ -1,8 +1,14 @@
+/**
+ * URL <-> Filters helpers
+ *
+ * Responsibilities:
+ * - Build URLSearchParams from our `Filters` object
+ * - Parse URLSearchParams into a `Filters` object
+ * - Provide defaults and URL generation helpers
+ */
 import { Filters, ArtworkType, CultureOrStyle } from '@/models';
 
-/**
- * Build URL search parameters from filters object
- */
+/** Convert an in-memory `Filters` object to URLSearchParams for /explore. */
 export function buildQueryFromFilters(filters: Filters): URLSearchParams {
     const params = new URLSearchParams();
 
@@ -34,9 +40,7 @@ export function buildQueryFromFilters(filters: Filters): URLSearchParams {
     return params;
 }
 
-/**
- * Parse URL search parameters into filters object
- */
+/** Parse URLSearchParams from /explore into our `Filters` object. */
 export function parseFiltersFromSearchParams(searchParams: URLSearchParams): Filters {
     const filters: Filters = {};
 
@@ -83,18 +87,14 @@ export function parseFiltersFromSearchParams(searchParams: URLSearchParams): Fil
     return filters;
 }
 
-/**
- * Update URL with current filters (for browser history)
- */
+/** Produce a navigable URL (string) for a given `Filters` state. */
 export function updateUrlWithFilters(filters: Filters, pathname: string = '/explore'): string {
     const params = buildQueryFromFilters(filters);
     const queryString = params.toString();
     return queryString ? `${pathname}?${queryString}` : pathname;
 }
 
-/**
- * Reset filters to default state
- */
+/** Default filters: page 1, limit 20; no active constraints. */
 export function getDefaultFilters(): Filters {
     return {
         page: 1,

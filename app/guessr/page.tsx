@@ -6,12 +6,21 @@ import { Artwork } from '@/models';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
+/** Result of a user's guess for the current artwork. */
 interface GuessResult {
     artistCorrect: boolean;
     yearCorrect: boolean;
     submitted: boolean;
 }
 
+/**
+ * Art Guessr page
+ *
+ * Flow:
+ * 1) Fetch a random artwork (biased to modern paintings/drawings with images)
+ * 2) User guesses artist name and year; year is tolerant by ±5
+ * 3) Reveal correctness and allow advancing to the next artwork
+ */
 export default function GuessrPage() {
     const [artwork, setArtwork] = useState<Artwork | null>(null);
     const [loading, setLoading] = useState(true);
@@ -24,6 +33,7 @@ export default function GuessrPage() {
     // Results
     const [result, setResult] = useState<GuessResult | null>(null);
 
+    /** Load a fresh artwork and reset the form state. */
     const loadNewArtwork = async () => {
         // Reset form without showing loading state
         setArtistGuess('');
@@ -40,12 +50,17 @@ export default function GuessrPage() {
         }
     };
 
-    // Load initial artwork
+    // Load the first artwork when mounting
     useEffect(() => {
         setLoading(true);
         loadNewArtwork().finally(() => setLoading(false));
     }, []);
 
+    /**
+     * Validate the artist and year guesses.
+     * - Artist: case-insensitive substring match to be forgiving
+     * - Year: within ±5 years of the derived correct year
+     */
     const handleSubmit = () => {
         if (!artwork) return;
 

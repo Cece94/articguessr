@@ -1,3 +1,4 @@
+/** Enumeration of curated culture/style values for filtering. */
 export enum CultureOrStyle {
     JapaneseCultureOrStyle = "Japanese (culture or style)",
     Century21st = "21st Century",
@@ -45,10 +46,12 @@ export enum CultureOrStyle {
     Century15th = "15th century"
 }
 
+/** Return all supported culture/style strings. */
 export function getAllCultureOrStyles(): CultureOrStyle[] {
     return Object.values(CultureOrStyle);
 }
 
+/** Case-insensitive substring filter over culture/style values. */
 export function filterCultureOrStyles(query: string): CultureOrStyle[] {
     if (!query) return getAllCultureOrStyles();
 

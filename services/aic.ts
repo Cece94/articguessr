@@ -1,9 +1,18 @@
+/**
+ * Art Institute of Chicago (AIC) data access layer
+ *
+ * Responsibilities:
+ * - Map raw AIC API responses to our normalized `Artwork` model
+ * - Provide small, testable helpers (e.g., decade, IIIF URL)
+ * - Fetch paginated artworks with optional search filters
+ * - Provide a utility to fetch a single random artwork for Guessr
+ */
 import { Artwork, ArtworkRaw, Filters, Paginated, AicApiResponse } from '@/models';
 
 const AIC_BASE_URL = 'https://api.artic.edu/api/v1/artworks';
 const AIC_SEARCH_URL = 'https://api.artic.edu/api/v1/artworks/search';
 
-// Required fields for the API
+// Required fields fetched from the AIC API to keep payloads small
 const REQUIRED_FIELDS = [
     'id',
     'image_id',
@@ -19,30 +28,22 @@ const REQUIRED_FIELDS = [
     'thumbnail'
 ];
 
-/**
- * Compute decade from a year by flooring to the nearest decade
- */
+/** Compute the decade for a given year (floors to nearest lower multiple of 10). */
 export function computeDecade(year: number): number {
     return Math.floor(year / 10) * 10;
 }
 
-/**
- * Generate IIIF image URL from image_id
- */
+/** Build an IIIF image URL from an AIC image_id for consistent image sizing. */
 export function generateImageUrl(imageId: string): string {
     return `https://www.artic.edu/iiif/2/${imageId}/full/600,/0/default.jpg`;
 }
 
-/**
- * Get primary year from artwork (prefer date_end, fallback to date_start)
- */
+/** Prefer `date_end` over `date_start` when picking an artwork's primary year. */
 export function getPrimaryYear(artwork: ArtworkRaw): number | null {
     return artwork.date_end ?? artwork.date_start;
 }
 
-/**
- * Map raw artwork from API to normalized Artwork model
- */
+/** Normalize an AIC `ArtworkRaw` record into our app's `Artwork` model. */
 export function mapArtwork(raw: ArtworkRaw): Artwork {
     const primaryYear = getPrimaryYear(raw);
 
@@ -64,9 +65,7 @@ export function mapArtwork(raw: ArtworkRaw): Artwork {
     };
 }
 
-/**
- * Build query parameters for AIC API
- */
+/** Build common query parameters for the non-search AIC endpoint. */
 function buildApiQuery(filters: Filters = {}): URLSearchParams {
     const params = new URLSearchParams();
 
@@ -86,7 +85,8 @@ function buildApiQuery(filters: Filters = {}): URLSearchParams {
 }
 
 /**
- * Fetch a random artwork (painting or drawing from 1900 onwards) from Art Institute of Chicago API
+ * Fetch a random artwork (biased toward paintings/drawings post-1860) using the AIC Search API.
+ * Used by the Guessr game to provide a reasonably modern piece with an image.
  */
 export async function fetchRandomArtwork(): Promise<Artwork> {
     // Define painting and drawing types
@@ -152,9 +152,7 @@ export async function fetchRandomArtwork(): Promise<Artwork> {
     throw new Error('Failed to fetch random artwork after all attempts');
 }
 
-/**
- * Fallback strategy: fetch any artwork with image from regular API
- */
+/** Fallback: fetch a random page from the regular API when search yields nothing. */
 async function fetchRandomArtworkFallback(): Promise<Artwork> {
     const randomPage = Math.floor(Math.random() * 100) + 1;
 
@@ -182,7 +180,15 @@ async function fetchRandomArtworkFallback(): Promise<Artwork> {
 }
 
 /**
- * Fetch artworks from Art Institute of Chicago API
+ * Fetch artworks from the Art Institute of Chicago.
+ *
+ * Behavior:
+ * - If any filter is provided, use the Search API with a boolean query.
+ * - Otherwise, use the regular endpoint with minimal query params.
+ *
+ * Notes:
+ * - We require images (`has_image=1`) for display purposes.
+ * - Sorting is delegated to the API defaults; we prioritize recent items in queries when applicable.
  */
 export async function fetchArtworks(filters: Filters = {}): Promise<Paginated<Artwork>> {
     // Use search API if any filter is present

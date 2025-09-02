@@ -1,3 +1,4 @@
+/** Enumeration of supported artwork types for filtering. */
 export enum ArtworkType {
     Print = "Print",
     Photograph = "Photograph",
@@ -43,10 +44,12 @@ export enum ArtworkType {
     Prototypes = "Prototypes"
 }
 
+/** Return all available artwork types as an array. */
 export function getAllArtworkTypes(): ArtworkType[] {
     return Object.values(ArtworkType);
 }
 
+/** Case-insensitive substring filter over all artwork types. */
 export function filterArtworkTypes(query: string): ArtworkType[] {
     if (!query) return getAllArtworkTypes();
 

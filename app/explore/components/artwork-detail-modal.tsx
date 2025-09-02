@@ -15,16 +15,20 @@ interface ArtworkDetailModalProps {
     onClose: () => void;
 }
 
+/**
+ * Modal showing a large image alongside key metadata for an artwork.
+ * Missing fields are omitted from the details grid.
+ */
 export function ArtworkDetailModal({ artwork, isOpen, onClose }: ArtworkDetailModalProps) {
     if (!artwork) return null;
 
-    // Helper function to format period (decade)
+    // Format period (decade) as "1890s" etc.
     const getPeriod = (decade: number | null): string | null => {
         if (!decade) return null;
         return `${decade}s`;
     };
 
-    // Helper function to render field only if value exists
+    // Render a labeled field if a non-null value is provided
     const renderField = (label: string, value: string | null) => {
         if (!value) return null;
         return (
